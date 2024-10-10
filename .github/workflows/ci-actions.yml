@@ -13,19 +13,19 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        GOVER: ['1.22', '1.21']
+        GOVER: ['1.23', '1.22']
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Setup Go-${{ matrix.GOVER }}
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.GOVER }}
-      - name: Checkout
-        uses: actions/checkout@v4
       - name: Linting
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.56.2
-          args: --config=./.etc/golangci.yml ./...
+          version: v1.61.0
+          install-mode: goinstall
       - name: Check shadowing
         run: |
          go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow@latest
@@ -61,7 +61,7 @@ jobs:
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - name: Testing
         run: |
-          docker run --rm -v `pwd`:`pwd` -w `pwd` ${{matrix.CFG[1]}}/golang:${{matrix.CFG[2]}} go test -v ./...
+          docker run --rm --platform linux/${{matrix.CFG[0]}} -v `pwd`:`pwd` -w `pwd` ${{matrix.CFG[1]}}/golang:${{matrix.CFG[2]}} go test -v ./...
   build_modes:
     needs: [amd64_job]
     runs-on: ubuntu-22.04
@@ -72,7 +72,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.23'
       - name: Build as Static
         run: make circl_static
       - name: Build as Plugin
@@ -88,7 +88,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.23'
       - name: Produce Coverage
         run: go test -coverprofile=./coverage.txt ./...
       - name: Upload Codecov
@@ -110,7 +110,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.23'
       - name: Building
         run: go build -v ./...
       - name: Testing
@@ -129,7 +129,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.23'
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
